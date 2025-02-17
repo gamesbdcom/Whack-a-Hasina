@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whack-a-Hasina Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e6e6e6;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            margin-top: 50px;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        .game-container {
+            margin-top: 30px;
+        }
+
+        .game-board {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 320px;
+            margin: 20px auto;
+        }
+
+        .hole {
+            width: 90px;
+            height: 90px;
+            background-color: #5c4033;
+            margin: 5px;
+            position: relative;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+
+        .mole {
+            width: 70px;
+            height: 70px;
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .score-board {
+            font-size: 24px;
+            margin: 20px 0;
+        }
+
+        /* মারার অবজেক্ট (লাঠি) */
+        .bat {
+            width: 50px;
+            height: 10px;
+            background-color: #444;
+            position: absolute;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Whack-a-Hasina!</h1>
+    <div class="score-board">
+        <span>Score: </span><span id="score">0</span>
+    </div>
+    
+    <div class="game-container">
+        <div class="game-board" id="board"></div>
+        <button onclick="startGame()">Start Game</button>
+    </div>
+
+    <!-- মারার অবজেক্ট (লাঠি) -->
+    <div id="bat" class="bat"></div>
+
+    <script>
+        const board = document.getElementById('board');
+        const scoreDisplay = document.getElementById('score');
+        const bat = document.getElementById('bat');
+        let score = 0;
+
+        // 9টি গর্ত তৈরি করা
+        for (let i = 0; i < 9; i++) {
+            const hole = document.createElement('div');
+            hole.classList.add('hole');
+            
+            const mole = document.createElement('img');
+            mole.src = 'https://i.postimg.cc/Kc1Bmy14/images-removebg-preview.png'; // হাসিনার ছবি
+            mole.classList.add('mole');
+            
+            mole.addEventListener('click', () => {
+                score++;
+                scoreDisplay.textContent = score;
+                mole.style.display = 'none'; // ক্লিক করলে মাথা লুকিয়ে যাবে
+            });
+
+            hole.appendChild(mole);
+            board.appendChild(hole);
+        }
+
+        function startGame() {
+            score = 0;
+            scoreDisplay.textContent = score;
+            bat.style.display = 'block'; // লাঠি দেখাবে
+
+            const moles = document.querySelectorAll('.mole');
+            
+            // গেম শুরু হওয়ার পর প্রতি সেকেন্ডে র‍্যান্ডম গর্তে মাথা উঠবে
+            setInterval(() => {
+                // সব মাথা লুকিয়ে দেওয়া
+                moles.forEach(mole => mole.style.display = 'none');
+                
+                const randomIndex = Math.floor(Math.random() * moles.length);
+                moles[randomIndex].style.display = 'block'; // র‍্যান্ডম গর্তে মাথা উঠবে
+
+                // কিছু সময় পর মাথা লুকিয়ে যাবে
+                setTimeout(() => {
+                    moles[randomIndex].style.display = 'none';
+                }, 800);
+            }, 1000); // 1000 মিলিসেকেন্ডে একবার মাথা উঠবে
+        }
+
+        // টাচ দিয়ে লাঠি ব্যবহার করা
+        board.addEventListener('touchstart', (e) => {
+            const touch = e.touches[0]; // প্রথম টাচ পয়েন্ট
+
+            // লাঠি স্ক্রীনে টাচ পজিশনে রাখবে
+            bat.style.left = `${touch.clientX - board.offsetLeft - bat.offsetWidth / 2}px`;
+
+            const moles = document.querySelectorAll('.mole');
+            moles.forEach(mole => {
+                const moleRect = mole.getBoundingClientRect();
+
+                // মোলের উপর টাচ করলে
+                if (touch.clientX >= moleRect.left && touch.clientX <= moleRect.right &&
+                    touch.clientY >= moleRect.top && touch.clientY <= moleRect.bottom) {
+                    mole.style.display = 'none'; // মাথা লুকিয়ে যাবে
+                    score++;
+                    scoreDisplay.textContent = score; // স্কোর বাড়ানো
+                }
+            });
+        });
+    </script>
+</body>
+</html>
